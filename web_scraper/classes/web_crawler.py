@@ -16,6 +16,19 @@ class LoginIDs(object):
         self.user_name = user_name
         self.password = password
 
+class DayPart(object):
+
+    def __init__(self, start_time, end_time, days):
+        self.start_time = start_time
+        self.end_time = end_time
+        self.days = days
+
+    def time_range(self):
+        return "{} - {}".format(self.start_time, self.end_time)
+
+    def day_text(self):
+        if self.days:
+            return "All days"
 
 class WebCrawler(object):
     """
@@ -57,6 +70,10 @@ class WebCrawler(object):
     average_overlay_name = "highcharts-mm-average-overlay"
     tspan_name = "tspan"
     average_text_match = " Average"
+    report_sidebar = "report-sidebar"
+    daypart_id = "ui-id-3"
+    row_tag = 'tr'
+    column_tag = 'td'
 
     def __init__(self):
         os.environ[self.moz_env_key] = self.moz_env_value
@@ -89,6 +106,18 @@ class WebCrawler(object):
         submit = self.driver.find_element_by_id(self.login_button_id)
         submit.click()
 
+    def click_select_ok(self):
+        try:
+            buttonset_list = self.driver.find_elements_by_class_name(self.station_window_button_class)
+            buttonset = [element for element in buttonset_list if element.text == self.buttonset_text][0]
+
+            buttons = buttonset.find_elements_by_tag_name(self.button_tag)
+            ok_button = [element for element in buttons if element.text == self.ok_text][0]
+
+            ok_button.click()
+        except IndexError:
+            pass
+
     def select_station(self, station_name: str):
         """
         Selects the correct station
@@ -104,19 +133,8 @@ class WebCrawler(object):
                                                                                             station_name))
         reduced_element_list = [element for element in element_list if element.text == station_name]
         station_element = reduced_element_list[0]
-
         station_element.click()
-
-        try:
-            buttonset_list = self.driver.find_elements_by_class_name(self.station_window_button_class)
-            buttonset = [element for element in buttonset_list if element.text == self.buttonset_text][0]
-
-            buttons = buttonset.find_elements_by_tag_name(self.button_tag)
-            ok_button = [element for element in buttons if element.text == self.ok_text][0]
-
-            ok_button.click()
-        except IndexError:
-            pass
+        self.click_select_ok()
 
     def button_click(self, button):
         hover = ActionChains(self.driver).move_to_element(button)
@@ -180,9 +198,32 @@ class WebCrawler(object):
         average_text.replace(self.average_text_match, '')
         self.station_averages[station_name] = average_text
 
-    def update_station_trends(self, station_name: str):
+    def select_day_part(self, day_part: DayPart):
+        sidebar = self.driver.find_element_by_id(self.report_sidebar)
+        daypart_filter = sidebar.find_elements_by_class_name('report-filter-item')[-2]
+        daypart_button = daypart_filter.find_elements_by_tag_name(self.button_tag)[0]
+
+        self.button_click(daypart_button)
+
+        daypart_ui = self.driver.find_element_by_id(self.daypart_id)
+        daypart_rows = daypart_ui.find_elements_by_tag_name(self.row_tag)
+
+        for row in daypart_rows:
+            columns = row.find_elements_by_tag_name(self.column_tag)
+
+            if columns[1].text == day_part.time_range():
+                if columns[2].text == day_part.day_text():
+                    break
+
+        row.click()
+        self.click_select_ok()
+
+    def update_station_trends(self, station_name: str, time_start, time_end,
+                              day_part: DayPart):
         self.driver.get(self.audience_reaction_url)
         self.select_station(station_name)
+        self.select_time_range(time_start, time_end)
+        self.select_day_part(day_part)
 
         self.driver.find_element_by_id(self.go_button_id).click()
 
