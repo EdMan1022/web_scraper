@@ -1,0 +1,17 @@
+Flask-Script
+Flask-Migrate
+coverage
+python-dotenv
+flask
+psycopg2
+pandas
+werkzeug
+Flask-WTF
+Flask-Testing
+sqlalchemy
+Flask-SQLAlchemy
+xlrd
+ipython
+numpy
+notebook
+requests
