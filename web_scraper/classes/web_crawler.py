@@ -43,6 +43,14 @@ class WebCrawler(object):
     ok_text = "OK"
     time_range_id = "ctrlDateRange"
 
+    date_picker_id = "ui-datepicker-div"
+    date_picker_ui = None
+    datepicker_year_class = "ui-datepicker-year"
+    datepicker_month_class = "ui-datepicker-month"
+    datepicker_calendar_class = "ui-datepicker-calendar"
+    go_button_id = "btnGo"
+    average_class_name = "average-panel"
+
     def __init__(self):
         os.environ[self.moz_env_key] = self.moz_env_value
         binary = FirefoxBinary(self.firefox_bin_path, log_file=sys.stdout)
@@ -77,6 +85,7 @@ class WebCrawler(object):
     def select_station(self, station_name: str):
         """
         Selects the correct station
+
         :param station_name:
         :return:
         """
@@ -107,12 +116,39 @@ class WebCrawler(object):
         hover.click().perform()
 
     def select_date(self, date):
-        pass
 
+        self.date_picker_ui = self.driver.find_element_by_id(self.date_picker_id)
+
+        self.select_year(date.year)
+        self.select_month(date.month)
+        self.select_day(date.day)
+
+    @staticmethod
+    def select_find(element, option):
+        options = element.find_elements_by_tag_name('option')
+        select_option = [option_element for option_element in options if option_element.text == option][0]
+        select_option.click()
+
+    def select_year(self, year):
+        year_select = self.date_picker_ui.find_element_by_class(self.datepicker_year_class)
+        self.select_find(year_select, str(year))
+
+    def select_month(self, month):
+        month_select = self.date_picker_ui.find_element_by_class(self.datepicker_month_class)
+        options = month_select.find_elements_by_tag_name('option')
+        select_option = [
+            option_element for option_element in options if option_element.get_property('value') == str(month-1)][0]
+        select_option.click()
+
+    def select_day(self, day):
+        datepicker_calendar = self.date_picker_ui.find_element_by_class_name(self.datepicker_calendar_class)
+        date_links = datepicker_calendar.find_elements_by_tag_name('a')
+        date_link = [this_date for this_date in date_links if this_date.text == str(day)][0]
+        date_link.click()
 
     def select_time_range(self, time_start, time_end):
         time_range_element = self.driver.find_element_by_id(self.time_range_id)
-        time_range_buttons = self.driver.find_elements_by_tag_name(self.button_tag)
+        time_range_buttons = time_range_element.find_elements_by_tag_name(self.button_tag)
         start_button = time_range_buttons[0]
         end_button = time_range_buttons[1]
         self.button_click(start_button)
@@ -121,23 +157,18 @@ class WebCrawler(object):
         self.button_click(end_button)
         self.select_date(time_end)
 
-
-
-
-
-
-
-
-
     def update_station_trends(self, station_name: str):
-
         self.driver.get(self.audience_reaction_url)
         self.select_station(station_name)
 
+        self.driver.find_element_by_id(self.go_button_id).click()
 
+        wait = True
 
-
-
-
-
+        while wait:
+            print('Waiting')
+            time.sleep(3)
+            average_panel = self.driver.find_element_by_class_name(self.average_class_name)
+            if len(average_panel > 0):
+                wait = False
 
