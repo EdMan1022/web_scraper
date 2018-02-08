@@ -53,7 +53,7 @@ class WebCrawler(object):
     station_match_text = "(//*[contains(text(), '{}')] | //*[@value='{}'])"
     station_window_button_class = "ui-dialog-buttonset"
 
-    input_pause_time = .5
+    input_pause_time = 1.
     buttonset_text = "OKCancel"
     button_tag = "button"
     ok_text = "OK"
@@ -155,11 +155,11 @@ class WebCrawler(object):
         select_option.click()
 
     def select_year(self, year):
-        year_select = self.date_picker_ui.find_element_by_class(self.datepicker_year_class)
+        year_select = self.date_picker_ui.find_element_by_class_name(self.datepicker_year_class)
         self.select_find(year_select, str(year))
 
     def select_month(self, month):
-        month_select = self.date_picker_ui.find_element_by_class(self.datepicker_month_class)
+        month_select = self.date_picker_ui.find_element_by_class_name(self.datepicker_month_class)
         options = month_select.find_elements_by_tag_name('option')
         select_option = [
             option_element for option_element in options if option_element.get_property('value') == str(month-1)][0]
@@ -198,12 +198,16 @@ class WebCrawler(object):
         average_text.replace(self.average_text_match, '')
         self.station_averages[station_name] = average_text
 
+    def pause(self):
+        time.sleep(self.input_pause_time)
+
     def select_day_part(self, day_part: DayPart):
         sidebar = self.driver.find_element_by_id(self.report_sidebar)
         daypart_filter = sidebar.find_elements_by_class_name('report-filter-item')[-2]
         daypart_button = daypart_filter.find_elements_by_tag_name(self.button_tag)[0]
 
         self.button_click(daypart_button)
+        self.pause()
 
         daypart_ui = self.driver.find_element_by_id(self.daypart_id)
         daypart_rows = daypart_ui.find_elements_by_tag_name(self.row_tag)
