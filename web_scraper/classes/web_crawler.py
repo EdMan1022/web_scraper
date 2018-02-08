@@ -22,12 +22,15 @@ class WebCrawler(object):
     Wraps a headless firefox browser
     """
 
+    station_averages = {}
+
     moz_env_key = "MOZ_HEADLESS"
     moz_env_value = "1"
     firefox_bin_path = db.app.config['FIREFOX_BINARY_PATH']
 
     login_ids = LoginIDs(db.app.config['MEDIA_MONITORS_USERNAME'],
                          db.app.config['MEDIA_MONITORS_PASSWORD'])
+    login_url = "https://www2.mediamonitors.com/v2/app/Account/LogOn"
     login_button_id = "btnLogin"
 
     audience_reaction_url = "https://www2.mediamonitors.com/v2/app/Reports/AudienceReaction"
@@ -50,6 +53,10 @@ class WebCrawler(object):
     datepicker_calendar_class = "ui-datepicker-calendar"
     go_button_id = "btnGo"
     average_class_name = "average-panel"
+    average_check_class = "checkable show-average-button"
+    average_overlay_name = "highcharts-mm-average-overlay"
+    tspan_name = "tspan"
+    average_text_match = " Average"
 
     def __init__(self):
         os.environ[self.moz_env_key] = self.moz_env_value
@@ -68,7 +75,7 @@ class WebCrawler(object):
         element.clear()
         element.send_keys(input_keys)
 
-    def login(self, url: str):
+    def login(self):
         """
         Logs the browser into a page at the given url
 
@@ -76,7 +83,7 @@ class WebCrawler(object):
         :return:
         """
 
-        self.driver.get(url)
+        self.driver.get(self.login_url)
         self.send_input_by_id(self.login_ids.user_name_key, self.login_ids.user_name)
         self.send_input_by_id(self.login_ids.password_key, self.login_ids.password)
         submit = self.driver.find_element_by_id(self.login_button_id)
@@ -157,6 +164,22 @@ class WebCrawler(object):
         self.button_click(end_button)
         self.select_date(time_end)
 
+    def show_average(self):
+        self.driver.find_element_by_class_name(self.average_overlay_name)
+        average_check = self.driver.find_elements_by_class_name(self.average_check_class)
+        if len(average_check) == 0:
+            average_check = self.driver.find_elements_by_class_name(self.average_class_name)[0]
+            average_check.find_element_by_tag_name('input').click()
+
+    def record_average(self, station_name):
+        average_overlay = self.driver.find_element_by_class_name(self.average_overlay_name)
+        average_texts = average_overlay.find_elements_by_tag_name(self.tspan_name)
+
+        average_text_element = [avg_text for avg_text in average_texts if self.average_text_match in avg_text.text][0]
+        average_text = average_text_element.text
+        average_text.replace(self.average_text_match, '')
+        self.station_averages[station_name] = average_text
+
     def update_station_trends(self, station_name: str):
         self.driver.get(self.audience_reaction_url)
         self.select_station(station_name)
@@ -168,7 +191,9 @@ class WebCrawler(object):
         while wait:
             print('Waiting')
             time.sleep(3)
-            average_panel = self.driver.find_element_by_class_name(self.average_class_name)
+            average_panel = self.driver.find_elements_by_class_name(self.average_class_name)
             if len(average_panel > 0):
                 wait = False
 
+        self.show_average()
+        self.record_average(station_name)
