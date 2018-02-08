@@ -15,3 +15,7 @@ class BaseConfig(object):
     DEBUG = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     APP_NAME = 'fulcrum_reconciliation'
+
+    FIREFOX_BINARY_PATH = os.environ.get('FIREFOX_BINARY_PATH')
+    MEDIA_MONITORS_USERNAME = os.environ.get('MEDIA_MONITORS_USERNAME')
+    MEDIA_MONITORS_PASSWORD = os.environ.get('MEDIA_MONITORS_PASSWORD')

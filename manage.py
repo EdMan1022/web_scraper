@@ -1,9 +1,9 @@
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
-from fulcrum_reconciliation.config import ProductionConfig
-from fulcrum_reconciliation.create_app import create_app
+from web_scraper.config import DevelopmentConfig
+from web_scraper.app_create import create_app
 
-app = create_app(config=ProductionConfig)
+app = create_app(config=DevelopmentConfig)
 
 from web_scraper.extensions import db
 
