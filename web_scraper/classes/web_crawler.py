@@ -16,6 +16,7 @@ class LoginIDs(object):
         self.user_name = user_name
         self.password = password
 
+
 class DayPart(object):
 
     def __init__(self, start_time, end_time, days):
@@ -29,6 +30,7 @@ class DayPart(object):
     def day_text(self):
         if self.days:
             return "All days"
+
 
 class WebCrawler(object):
     """
@@ -108,6 +110,7 @@ class WebCrawler(object):
 
     def click_select_ok(self):
         try:
+            self.driver.get_screenshot_as_file('test7.png')
             buttonset_list = self.driver.find_elements_by_class_name(self.station_window_button_class)
             buttonset = [element for element in buttonset_list if element.text == self.buttonset_text][0]
 
@@ -115,6 +118,7 @@ class WebCrawler(object):
             ok_button = [element for element in buttons if element.text == self.ok_text][0]
 
             ok_button.click()
+            self.driver.get_screenshot_as_file('test8.png')
         except IndexError:
             pass
 
@@ -129,11 +133,18 @@ class WebCrawler(object):
         station_drop_down.click()
         time.sleep(self.input_pause_time)
         station_window = self.driver.find_element_by_id(self.station_window_id)
+        station_search_element = station_window.find_element_by_class_name('keyword-search-input')
+        station_search_element.send_keys(station_name)
+
+        station_window = self.driver.find_element_by_id(self.station_window_id)
         element_list = station_window.find_elements_by_xpath(self.station_match_text.format(station_name,
                                                                                             station_name))
         reduced_element_list = [element for element in element_list if element.text == station_name]
         station_element = reduced_element_list[0]
+        print(station_element.text)
         station_element.click()
+        self.pause()
+        self.driver.get_screenshot_as_file('test6.png')
         self.click_select_ok()
 
     def button_click(self, button):
@@ -183,20 +194,20 @@ class WebCrawler(object):
         self.select_date(time_end)
 
     def show_average(self):
-        self.driver.find_element_by_class_name(self.average_overlay_name)
         average_check = self.driver.find_elements_by_class_name(self.average_check_class)
         if len(average_check) == 0:
             average_check = self.driver.find_elements_by_class_name(self.average_class_name)[0]
-            average_check.find_element_by_tag_name('input').click()
+            average_check.click()
 
     def record_average(self, station_name):
+        self.pause()
         average_overlay = self.driver.find_element_by_class_name(self.average_overlay_name)
         average_texts = average_overlay.find_elements_by_tag_name(self.tspan_name)
 
         average_text_element = [avg_text for avg_text in average_texts if self.average_text_match in avg_text.text][0]
         average_text = average_text_element.text
-        average_text.replace(self.average_text_match, '')
-        self.station_averages[station_name] = average_text
+        average_score = average_text.replace(self.average_text_match, '')
+        self.station_averages[station_name] = average_score
 
     def pause(self):
         time.sleep(self.input_pause_time)
@@ -226,6 +237,7 @@ class WebCrawler(object):
     def update_station_trends(self, station_name: str, time_start, time_end,
                               day_part: DayPart):
         self.driver.get(self.audience_reaction_url)
+
         self.select_station(station_name)
         self.select_time_range(time_start, time_end)
         self.select_day_part(day_part)
@@ -238,8 +250,9 @@ class WebCrawler(object):
             print('Waiting')
             time.sleep(3)
             average_panel = self.driver.find_elements_by_class_name(self.average_class_name)
-            if len(average_panel > 0):
+            if len(average_panel) > 0:
                 wait = False
 
+        self.driver.get_screenshot_as_file('test9.png')
         self.show_average()
         self.record_average(station_name)
