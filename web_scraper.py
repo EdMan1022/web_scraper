@@ -1,12 +1,7 @@
-from flask import Flask
+from web_scraper.app_create import create_app
+from web_scraper.config import DevelopmentConfig
 
-app = Flask(__name__)
+app = create_app(DevelopmentConfig)
 
-
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run()
