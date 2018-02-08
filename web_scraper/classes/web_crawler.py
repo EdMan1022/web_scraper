@@ -195,9 +195,8 @@ class WebCrawler(object):
 
     def show_average(self):
         average_check = self.driver.find_elements_by_class_name(self.average_check_class)
-        if len(average_check) == 0:
-            average_check = self.driver.find_elements_by_class_name(self.average_class_name)[0]
-            average_check.click()
+        average_check = self.driver.find_elements_by_class_name(self.average_class_name)[0]
+        average_check.click()
 
     def record_average(self, station_name):
         self.pause()
