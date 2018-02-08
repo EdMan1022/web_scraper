@@ -1,5 +1,6 @@
 import os
 from selenium import webdriver
+from selenium.common import exceptions as sel_exc
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 import sys
 from web_scraper.extensions import db
@@ -194,9 +195,12 @@ class WebCrawler(object):
         self.select_date(time_end)
 
     def show_average(self):
-        average_check = self.driver.find_elements_by_class_name(self.average_check_class)
-        average_check = self.driver.find_elements_by_class_name(self.average_class_name)[0]
-        average_check.click()
+
+        try:
+            average_overlay = self.driver.find_element_by_class_name(self.average_overlay_name)
+        except sel_exc.NoSuchElementException:
+            average_check = self.driver.find_elements_by_class_name(self.average_class_name)[0]
+            average_check.click()
 
     def record_average(self, station_name):
         self.pause()
