@@ -215,9 +215,10 @@ class WebCrawler(object):
         for row in daypart_rows:
             columns = row.find_elements_by_tag_name(self.column_tag)
 
-            if columns[1].text == day_part.time_range():
-                if columns[2].text == day_part.day_text():
-                    break
+            if len(columns) > 1:
+                if columns[1].text == day_part.time_range():
+                    if columns[2].text == day_part.day_text():
+                        break
 
         row.click()
         self.click_select_ok()
