@@ -79,6 +79,7 @@ class WebCrawler(object):
     row_tag = 'tr'
     column_tag = 'td'
     score_chart_id = "pnlChart"
+    screenshot_n = 0
 
     def __init__(self):
         os.environ[self.moz_env_key] = self.moz_env_value
@@ -250,8 +251,13 @@ class WebCrawler(object):
             except sel_exc.NoSuchElementException:
                 pass
 
-    def screenshot(self, n):
-        self.driver.get_screenshot_as_file("test{}.png".format(n))
+    def screenshot(self, title=None):
+
+        if title is None:
+            self.screenshot_n += 1
+            title = self.screenshot_n
+
+        self.driver.get_screenshot_as_file("test_{}.png".format(title))
 
     def update_station_trends(self, station_name: str, time_start, time_end,
                               day_part: DayPart):
@@ -263,7 +269,7 @@ class WebCrawler(object):
 
         self.driver.find_element_by_id(self.go_button_id).click()
         self.score_chart_wait()
-        self.screenshot(9)
+        self.screenshot()
         self.show_average()
-        self.screenshot(10)
+        self.screenshot()
         self.record_average(station_name)
