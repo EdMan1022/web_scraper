@@ -57,6 +57,7 @@ class WebCrawler(object):
     station_window_button_class = "ui-dialog-buttonset"
 
     input_pause_time = 1.
+    wait_time = 3.
     buttonset_text = "OKCancel"
     button_tag = "button"
     ok_text = "OK"
@@ -77,6 +78,7 @@ class WebCrawler(object):
     daypart_id = "ui-id-3"
     row_tag = 'tr'
     column_tag = 'td'
+    score_chart_id = "pnlChart"
 
     def __init__(self):
         os.environ[self.moz_env_key] = self.moz_env_value
@@ -237,6 +239,20 @@ class WebCrawler(object):
         row.click()
         self.click_select_ok()
 
+    def score_chart_wait(self):
+        wait = True
+        while wait:
+            print('Waiting')
+            time.sleep(self.wait_time)
+            try:
+                self.driver.find_element(self.score_chart_id)
+                wait = True
+            except sel_exc.NoSuchElementException:
+                pass
+
+    def screenshot(self, n):
+        self.driver.get_screenshot_as_file("test{}.png".format(n))
+
     def update_station_trends(self, station_name: str, time_start, time_end,
                               day_part: DayPart):
         self.driver.get(self.audience_reaction_url)
@@ -246,16 +262,8 @@ class WebCrawler(object):
         self.select_day_part(day_part)
 
         self.driver.find_element_by_id(self.go_button_id).click()
-
-        wait = True
-
-        while wait:
-            print('Waiting')
-            time.sleep(3)
-            average_panel = self.driver.find_elements_by_class_name(self.average_class_name)
-            if len(average_panel) > 0:
-                wait = False
-
-        self.driver.get_screenshot_as_file('test9.png')
+        self.score_chart_wait()
+        self.screenshot(9)
         self.show_average()
+        self.screenshot(10)
         self.record_average(station_name)
