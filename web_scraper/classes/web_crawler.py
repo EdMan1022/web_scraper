@@ -141,6 +141,7 @@ class WebCrawler(object):
         station_search_element.send_keys(station_name)
 
         station_window = self.driver.find_element_by_id(self.station_window_id)
+        time.sleep(2.)
         element_list = station_window.find_elements_by_xpath(self.station_match_text.format(station_name,
                                                                                             station_name))
         reduced_element_list = [element for element in element_list if element.text == station_name]
@@ -247,7 +248,7 @@ class WebCrawler(object):
             print('Waiting')
             time.sleep(self.wait_time)
             try:
-                self.driver.find_element_by_class_name(self.average_overlay_name)
+                self.driver.find_element_by_class_name(self.average_class_name)
                 wait = False
                 time.sleep(self.wait_time)
             except sel_exc.NoSuchElementException:
@@ -255,9 +256,11 @@ class WebCrawler(object):
 
     def screenshot(self, title=None):
 
+        self.n_screenshot += 1
         if title is None:
-            self.n_screenshot += 1
             title = self.n_screenshot
+        else:
+            title = "{}_{}".format(title, self.n_screenshot)
 
         self.driver.get_screenshot_as_file("test_{}.png".format(title))
 
