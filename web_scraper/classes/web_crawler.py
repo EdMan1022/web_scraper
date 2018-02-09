@@ -295,6 +295,7 @@ class WebCrawler(object):
                 print('not_interactable_station')
                 pass
             except IndexError:
+                self.screenshot('station_index_error')
                 print('index_error_station')
                 pass
 
