@@ -16,8 +16,11 @@ end_date = datetime.datetime(day=31, month=1, year=2018)
 day_part = DayPart(start_time="6:00 AM", end_time="7:00 PM", days=True)
 
 stations = os.environ['STATION_LIST'].split(',')[::-1]
-
+station_index = 0
 for station in stations:
+    station_index += 1
+    if station_index % 5 == 0:
+        web_crawler.reset_driver()
     print(station)
     try:
         web_crawler.update_station_trends(station, start_date, end_date, day_part)

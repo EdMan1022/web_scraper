@@ -89,6 +89,12 @@ class WebCrawler(object):
         binary = FirefoxBinary(self.firefox_bin_path, log_file=sys.stdout)
         self.driver = webdriver.Firefox(firefox_binary=binary)
 
+    def reset_driver(self):
+        self.driver.quit()
+        binary = FirefoxBinary(self.firefox_bin_path, log_file=sys.stdout)
+        self.driver = webdriver.Firefox(firefox_binary=binary)
+        self.login()
+
     def send_input_by_id(self, element_id, input_keys):
         """
         Finds an element, clears it, and sends new input as string
