@@ -277,38 +277,50 @@ class WebCrawler(object):
         else:
             title = "{}_{}".format(title, self.n_screenshot)
 
-        self.driver.get_screenshot_as_file("test_{}.png".format(title))
+        self.driver.get_screenshot_as_file("png_log/test_{}.png".format(title))
 
     def update_station_trends(self, station_name: str, time_start, time_end,
                               day_part: DayPart):
         self.driver.get(self.audience_reaction_url)
 
         station_bool = True
+        print('station_start')
         while station_bool:
             try:
                 station_bool = self.select_station(station_name)
             except sel_exc.NoSuchElementException:
+                print('no_element_station')
                 pass
             except sel_exc.ElementNotInteractableException:
+                print('not_interactable_station')
+                pass
+            except IndexError:
+                print('index_error_station')
                 pass
 
+        print('time_start')
         time_range_bool = True
         while time_range_bool:
             try:
                 time_range_bool = self.select_time_range(time_start, time_end)
             except sel_exc.NoSuchElementException:
+                print('no_element_time')
                 pass
             except sel_exc.ElementNotInteractableException:
+                print('not_interactable_time')
                 pass
         self.select_time_range(time_start, time_end)
 
+        print('day_start')
         day_part_bool = True
         while day_part_bool:
             try:
                 day_part_bool = self.select_day_part(day_part)
             except sel_exc.NoSuchElementException:
+                print('no_element_day')
                 pass
             except sel_exc.ElementNotInteractableException:
+                print('not_interactable_day')
                 pass
 
         self.driver.find_element_by_id(self.go_button_id).click()
