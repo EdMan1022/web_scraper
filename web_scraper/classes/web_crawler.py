@@ -58,6 +58,8 @@ class WebCrawler(object):
 
     input_pause_time = 1.
     wait_time = 3.
+    long_wait_time = 6.
+
     buttonset_text = "OKCancel"
     button_tag = "button"
     ok_text = "OK"
@@ -142,7 +144,7 @@ class WebCrawler(object):
         station_search_element.send_keys(station_name)
 
         station_window = self.driver.find_element_by_id(self.station_window_id)
-        time.sleep(2.)
+        time.sleep(3.)
         element_list = station_window.find_elements_by_xpath(self.station_match_text.format(station_name,
                                                                                             station_name))
         reduced_element_list = [element for element in element_list if element.text == station_name]
@@ -152,6 +154,64 @@ class WebCrawler(object):
         self.pause()
         self.screenshot()
         self.click_select_ok()
+        return False
+
+    def select_time_range(self, time_start, time_end):
+        time_range_element = self.driver.find_element_by_id(self.time_range_id)
+        time_range_buttons = time_range_element.find_elements_by_tag_name(self.button_tag)
+        start_button = time_range_buttons[0]
+        end_button = time_range_buttons[1]
+        self.button_click(start_button)
+        self.select_date(time_start)
+
+        self.button_click(end_button)
+        self.select_date(time_end)
+        return False
+
+    def select_day_part(self, day_part: DayPart):
+        sidebar = self.driver.find_element_by_id(self.report_sidebar)
+        daypart_filter = sidebar.find_elements_by_class_name('report-filter-item')[-2]
+        daypart_button = daypart_filter.find_elements_by_tag_name(self.button_tag)[0]
+
+        self.button_click(daypart_button)
+        self.pause()
+
+        daypart_ui = self.driver.find_element_by_id(self.daypart_id)
+        daypart_rows = daypart_ui.find_elements_by_tag_name(self.row_tag)
+
+        for row in daypart_rows:
+            columns = row.find_elements_by_tag_name(self.column_tag)
+
+            if len(columns) > 1:
+                if columns[1].text == day_part.time_range():
+                    if columns[2].text == day_part.day_text():
+                        break
+
+        row.click()
+        self.click_select_ok()
+        return False
+
+    def score_chart_wait(self, station_name):
+        wait = True
+        while wait:
+            self.screenshot('wait')
+            print('Waiting')
+            time.sleep(self.wait_time)
+
+            try:
+                self.driver.find_element_by_class_name(self.loading_message_box_class)
+            except sel_exc.NoSuchElementException:
+                try:
+                    self.screenshot("No message box class")
+                    element = self.driver.find_element_by_class_name(self.average_class_name)
+                    print(element.text)
+                    self.screenshot("Found average check")
+                    time.sleep(self.wait_time)
+                    self.show_average()
+                    self.record_average(station_name)
+                    wait = False
+                except sel_exc.NoSuchElementException:
+                    pass
 
     def button_click(self, button):
         hover = ActionChains(self.driver).move_to_element(button)
@@ -188,17 +248,6 @@ class WebCrawler(object):
         date_link = [this_date for this_date in date_links if this_date.text == str(day)][0]
         date_link.click()
 
-    def select_time_range(self, time_start, time_end):
-        time_range_element = self.driver.find_element_by_id(self.time_range_id)
-        time_range_buttons = time_range_element.find_elements_by_tag_name(self.button_tag)
-        start_button = time_range_buttons[0]
-        end_button = time_range_buttons[1]
-        self.button_click(start_button)
-        self.select_date(time_start)
-
-        self.button_click(end_button)
-        self.select_date(time_end)
-
     def show_average(self):
 
         try:
@@ -220,46 +269,6 @@ class WebCrawler(object):
     def pause(self):
         time.sleep(self.input_pause_time)
 
-    def select_day_part(self, day_part: DayPart):
-        sidebar = self.driver.find_element_by_id(self.report_sidebar)
-        daypart_filter = sidebar.find_elements_by_class_name('report-filter-item')[-2]
-        daypart_button = daypart_filter.find_elements_by_tag_name(self.button_tag)[0]
-
-        self.button_click(daypart_button)
-        self.pause()
-
-        daypart_ui = self.driver.find_element_by_id(self.daypart_id)
-        daypart_rows = daypart_ui.find_elements_by_tag_name(self.row_tag)
-
-        for row in daypart_rows:
-            columns = row.find_elements_by_tag_name(self.column_tag)
-
-            if len(columns) > 1:
-                if columns[1].text == day_part.time_range():
-                    if columns[2].text == day_part.day_text():
-                        break
-
-        row.click()
-        self.click_select_ok()
-
-    def score_chart_wait(self):
-        wait = True
-        while wait:
-            self.screenshot()
-            print('Waiting')
-            time.sleep(self.wait_time)
-
-            try:
-                self.driver.find_element_by_class_name(self.loading_message_box_class)
-            except sel_exc.NoSuchElementException:
-                try:
-                    self.driver.find_element_by_class_name(self.average_class_name)
-                    wait = False
-                    time.sleep(self.wait_time)
-
-                except sel_exc.NoSuchElementException:
-                    pass
-
     def screenshot(self, title=None):
 
         self.n_screenshot += 1
@@ -274,13 +283,34 @@ class WebCrawler(object):
                               day_part: DayPart):
         self.driver.get(self.audience_reaction_url)
 
-        self.select_station(station_name)
+        station_bool = True
+        while station_bool:
+            try:
+                station_bool = self.select_station(station_name)
+            except sel_exc.NoSuchElementException:
+                pass
+            except sel_exc.ElementNotInteractableException:
+                pass
+
+        time_range_bool = True
+        while time_range_bool:
+            try:
+                time_range_bool = self.select_time_range(time_start, time_end)
+            except sel_exc.NoSuchElementException:
+                pass
+            except sel_exc.ElementNotInteractableException:
+                pass
         self.select_time_range(time_start, time_end)
-        self.select_day_part(day_part)
+
+        day_part_bool = True
+        while day_part_bool:
+            try:
+                day_part_bool = self.select_day_part(day_part)
+            except sel_exc.NoSuchElementException:
+                pass
+            except sel_exc.ElementNotInteractableException:
+                pass
 
         self.driver.find_element_by_id(self.go_button_id).click()
-        self.score_chart_wait()
-        self.screenshot('wait_done')
-        self.show_average()
-        self.screenshot()
-        self.record_average(station_name)
+        self.score_chart_wait(station_name)
+        self.screenshot('done')
