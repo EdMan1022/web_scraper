@@ -141,6 +141,7 @@ class WebCrawler(object):
         time.sleep(self.input_pause_time)
         station_window = self.driver.find_element_by_id(self.station_window_id)
         station_search_element = station_window.find_element_by_class_name('keyword-search-input')
+        station_search_element.clear()
         station_search_element.send_keys(station_name)
 
         station_window = self.driver.find_element_by_id(self.station_window_id)
