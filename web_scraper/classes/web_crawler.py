@@ -196,8 +196,6 @@ class WebCrawler(object):
         while wait:
             self.screenshot('wait')
             print('Waiting')
-            time.sleep(self.wait_time)
-
             try:
                 self.driver.find_element_by_class_name(self.loading_message_box_class)
             except sel_exc.NoSuchElementException:
@@ -206,11 +204,14 @@ class WebCrawler(object):
                     element = self.driver.find_element_by_class_name(self.average_class_name)
                     print(element.text)
                     self.screenshot("Found average check")
-                    time.sleep(self.wait_time)
                     self.show_average()
                     self.record_average(station_name)
                     wait = False
                 except sel_exc.NoSuchElementException:
+                    pass
+                except sel_exc.ElementNotInteractableException:
+                    pass
+                except IndexError:
                     pass
 
     def button_click(self, button):
@@ -257,7 +258,6 @@ class WebCrawler(object):
             average_check.click()
 
     def record_average(self, station_name):
-        self.pause()
         average_overlay = self.driver.find_element_by_class_name(self.average_overlay_name)
         average_texts = average_overlay.find_elements_by_tag_name(self.tspan_name)
 
