@@ -80,6 +80,7 @@ class WebCrawler(object):
     column_tag = 'td'
     score_chart_id = "pnlChart"
     n_screenshot = 0
+    loading_message_box_class = "loading-mask-control with-message loading"
 
     def __init__(self):
         os.environ[self.moz_env_key] = self.moz_env_value
@@ -247,12 +248,17 @@ class WebCrawler(object):
             self.screenshot()
             print('Waiting')
             time.sleep(self.wait_time)
+
             try:
-                self.driver.find_element_by_class_name(self.average_class_name)
-                wait = False
-                time.sleep(self.wait_time)
+                self.driver.find_element_by_class_name(self.loading_message_box_class)
             except sel_exc.NoSuchElementException:
-                pass
+                try:
+                    self.driver.find_element_by_class_name(self.average_class_name)
+                    wait = False
+                    time.sleep(self.wait_time)
+
+                except sel_exc.NoSuchElementException:
+                    pass
 
     def screenshot(self, title=None):
 
@@ -274,7 +280,7 @@ class WebCrawler(object):
 
         self.driver.find_element_by_id(self.go_button_id).click()
         self.score_chart_wait()
-        self.screenshot()
+        self.screenshot('wait_done')
         self.show_average()
         self.screenshot()
         self.record_average(station_name)
