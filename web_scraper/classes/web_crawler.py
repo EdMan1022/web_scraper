@@ -79,7 +79,7 @@ class WebCrawler(object):
     row_tag = 'tr'
     column_tag = 'td'
     score_chart_id = "pnlChart"
-    screenshot_n = 0
+    n_screenshot = 0
 
     def __init__(self):
         os.environ[self.moz_env_key] = self.moz_env_value
@@ -114,7 +114,7 @@ class WebCrawler(object):
 
     def click_select_ok(self):
         try:
-            self.driver.get_screenshot_as_file('test7.png')
+            self.screenshot()
             buttonset_list = self.driver.find_elements_by_class_name(self.station_window_button_class)
             buttonset = [element for element in buttonset_list if element.text == self.buttonset_text][0]
 
@@ -122,7 +122,7 @@ class WebCrawler(object):
             ok_button = [element for element in buttons if element.text == self.ok_text][0]
 
             ok_button.click()
-            self.driver.get_screenshot_as_file('test8.png')
+            self.screenshot()
         except IndexError:
             pass
 
@@ -148,7 +148,7 @@ class WebCrawler(object):
         print(station_element.text)
         station_element.click()
         self.pause()
-        self.driver.get_screenshot_as_file('test6.png')
+        self.screenshot()
         self.click_select_ok()
 
     def button_click(self, button):
@@ -243,19 +243,20 @@ class WebCrawler(object):
     def score_chart_wait(self):
         wait = True
         while wait:
+            self.screenshot()
             print('Waiting')
             time.sleep(self.wait_time)
             try:
-                self.driver.find_element(self.score_chart_id)
-                wait = True
+                self.driver.find_element_by_id(self.score_chart_id)
+                wait = False
             except sel_exc.NoSuchElementException:
                 pass
 
     def screenshot(self, title=None):
 
         if title is None:
-            self.screenshot_n += 1
-            title = self.screenshot_n
+            self.n_screenshot += 1
+            title = self.n_screenshot
 
         self.driver.get_screenshot_as_file("test_{}.png".format(title))
 
