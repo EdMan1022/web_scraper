@@ -212,6 +212,8 @@ class WebCrawler(object):
                     pass
                 except sel_exc.ElementNotInteractableException:
                     pass
+                except sel_exc.StaleElementReferenceException:
+                    pass
                 except IndexError:
                     pass
 
