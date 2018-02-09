@@ -249,6 +249,7 @@ class WebCrawler(object):
             try:
                 self.driver.find_element_by_class_name(self.average_overlay_name)
                 wait = False
+                time.sleep(self.wait_time)
             except sel_exc.NoSuchElementException:
                 pass
 
