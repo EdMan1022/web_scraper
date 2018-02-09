@@ -280,7 +280,7 @@ class WebCrawler(object):
         else:
             title = "{}_{}".format(title, self.n_screenshot)
 
-        self.driver.get_screenshot_as_file("png_log/test_{}.png".format(title))
+        # self.driver.get_screenshot_as_file("png_log/test_{}.png".format(title))
 
     def update_station_trends(self, station_name: str, time_start, time_end,
                               day_part: DayPart):
