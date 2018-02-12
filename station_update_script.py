@@ -11,8 +11,8 @@ ctx.push()
 web_crawler = WebCrawler()
 web_crawler.login()
 
-start_date = datetime.datetime(day=25, month=1, year=2018)
-end_date = datetime.datetime(day=31, month=1, year=2018)
+start_date = datetime.datetime(day=1, month=2, year=2018)
+end_date = datetime.datetime(day=7, month=2, year=2018)
 day_part = DayPart(start_time="6:00 AM", end_time="7:00 PM", days=True)
 
 stations = os.environ['STATION_LIST'].split(',')[::-1]
