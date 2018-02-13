@@ -5,7 +5,7 @@ from .blueprints import react_bp
 
 def create_app(config):
 
-    app = Flask(config.APP_NAME)
+    app = Flask(__name__)
     app.config.from_object(config)
     db.init_app(app)
 

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head lang="en">
+    <meta charset="UTF-8">
+    <title>Flask React</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- styles -->
+  </head>
+  <body>
+    <div class="container">
+      <h1>Flask React</h1>
+      <br>
+      <div id="content"></div>
+    </div>
+    <!-- scripts -->
+
+
+
+    <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+
+    <script type="text/jsx">
+      /*** @jsx React.DOM */
+
+
+      ReactDOM.render(
+          <h1>Hello, World!</h1>,
+        document.getElementById('content')
+      );
+    </script>
+
+  </body>
+</html>
