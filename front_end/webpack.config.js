@@ -5,6 +5,7 @@ module.exports = {
     entry: path.resolve(__dirname, 'src', 'index.jsx'),
     output: {
         path: path.resolve(__dirname, 'output'),
+        publicPath: '/',
         filename: 'bundle.js'
     },
     resolve: {
@@ -27,6 +28,9 @@ module.exports = {
     },
     devServer: {
         contentBase: './src',
-        publicPath: '/output'
-    }
+        publicPath: '/output',
+        historyApiFallback: true,
+        hot: true
+    },
 };
+

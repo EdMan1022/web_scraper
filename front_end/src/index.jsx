@@ -1,11 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import Game from './components/HelloWorld';
+import AppRoutes from './routing';
+import BasicExample from './components/routingExample'
+import ParamsExample from './components/urlParameterExample'
 
 import './styles/app.scss';
-
 ReactDOM.render(
-   <Game />,
-   document.getElementById('app')
+    <ParamsExample/>,
+    document.getElementById('root')
 );
